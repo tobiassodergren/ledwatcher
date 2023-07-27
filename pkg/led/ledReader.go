@@ -14,15 +14,15 @@ func Read(verbose bool, gain int, treshold uint64, device string, c chan Status)
 	firstRead := true
 	for {
 		value := ReadLight(gain, device)
-		currentState := value < treshold
+		currentLitState := value > treshold
 		if verbose {
-			fmt.Printf("Value: %d, CurrentState: %t, Treshold: %d\n", value, currentState, treshold)
+			fmt.Printf("Value: %d, Treshold: %d\n", value, treshold)
 		}
-		if firstRead || currentState != state {
+		if firstRead || currentLitState != state {
 			if verbose {
-				fmt.Printf("Acting because firstread: %t, state: %t\n", firstRead, state)
+				fmt.Printf("Acting because firstread: %t, state: %t, newState: %t\n", firstRead, state, currentLitState)
 			}
-			state = currentState
+			state = currentLitState
 			c <- Status{state, value, treshold}
 			firstRead = false
 		}
