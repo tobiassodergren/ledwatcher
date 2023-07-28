@@ -1,7 +1,7 @@
 package led
 
 type Status struct {
-	IsLit    bool
-	Value    uint64
-	Treshold uint64
+	IsLit    bool   `json:"isLit"`
+	Value    uint64 `json:"value"`
+	Treshold uint64 `json:"treshold"`
 }

@@ -30,7 +30,7 @@ var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err
 }
 
 func Send(data string) {
-	client.Publish("led", 0, false, data)
+	client.Publish("panna/led", 0, true, data)
 }
 
 func Init(isVerbose bool, broker string, port int, username, password string) {

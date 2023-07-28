@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-var state bool
+var lastState bool
 
 func Read(verbose bool, gain int, treshold uint64, device string, c chan Status) {
 	if verbose {
@@ -14,16 +14,17 @@ func Read(verbose bool, gain int, treshold uint64, device string, c chan Status)
 	firstRead := true
 	for {
 		value := ReadLight(gain, device)
-		currentLitState := value > treshold
+		isLit := value > treshold
 		if verbose {
 			fmt.Printf("Value: %d, Treshold: %d\n", value, treshold)
 		}
-		if firstRead || currentLitState != state {
+		if firstRead || isLit != lastState {
 			if verbose {
-				fmt.Printf("Acting because firstread: %t, state: %t, newState: %t\n", firstRead, state, currentLitState)
+				fmt.Printf("Acting because firstread: %t, lastState: %t, isLit: %t\n",
+					firstRead, lastState, isLit)
 			}
-			state = currentLitState
-			c <- Status{state, value, treshold}
+			lastState = isLit
+			c <- Status{lastState, value, treshold}
 			firstRead = false
 		}
 		time.Sleep(5 * time.Second)
