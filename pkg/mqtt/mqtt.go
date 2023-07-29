@@ -4,12 +4,14 @@ package mqtt
 
 import (
 	"fmt"
+	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
 var verbose bool
 var client mqtt.Client
+var oldData string
 
 var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
 	if verbose {
@@ -21,6 +23,7 @@ var connectHandler mqtt.OnConnectHandler = func(client mqtt.Client) {
 	if verbose {
 		fmt.Println("Connected")
 	}
+	Send(oldData)
 }
 
 var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err error) {
@@ -30,7 +33,20 @@ var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err
 }
 
 func Send(data string) {
+	oldData = data
 	client.Publish("panna/led", 0, true, data)
+}
+
+func connect(client mqtt.Client) {
+	for {
+		if token := client.Connect(); token.Wait() && token.Error() != nil {
+			fmt.Printf("Connection error: %v\n", token.Error())
+			time.Sleep(15 * time.Second)
+		} else {
+			fmt.Println("Connected!")
+			return
+		}
+	}
 }
 
 func Init(isVerbose bool, broker string, port int, username, password string) {
@@ -44,7 +60,5 @@ func Init(isVerbose bool, broker string, port int, username, password string) {
 	opts.OnConnect = connectHandler
 	opts.OnConnectionLost = connectLostHandler
 	client = mqtt.NewClient(opts)
-	if token := client.Connect(); token.Wait() && token.Error() != nil {
-		panic(token.Error())
-	}
+	connect(client)
 }

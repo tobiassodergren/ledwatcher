@@ -11,21 +11,21 @@ func Read(verbose bool, gain int, treshold uint64, device string, c chan Status)
 	if verbose {
 		fmt.Println("About to start reading values from led.")
 	}
-	firstRead := true
+	initialize := true
 	for {
 		value := ReadLight(gain, device)
 		isLit := value > treshold
 		if verbose {
 			fmt.Printf("Value: %d, Treshold: %d\n", value, treshold)
 		}
-		if firstRead || isLit != lastState {
+		if initialize || isLit != lastState {
 			if verbose {
 				fmt.Printf("Acting because firstread: %t, lastState: %t, isLit: %t\n",
-					firstRead, lastState, isLit)
+					initialize, lastState, isLit)
 			}
 			lastState = isLit
 			c <- Status{lastState, value, treshold}
-			firstRead = false
+			initialize = false
 		}
 		time.Sleep(5 * time.Second)
 	}
